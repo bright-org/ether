@@ -1,0 +1,29 @@
+services:
+  fw:
+    image: debian:bookworm-slim
+    network_mode: host           # ← ホストの netns に効かせるため
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./fw-entrypoint.sh:/fw-entrypoint.sh:ro
+    entrypoint: ["/fw-entrypoint.sh"]
+    environment:
+      SRC_PORT: "40000"
+      DST_PORT: "40001"
+    restart: unless-stopped
+
+  ether-book:
+    image: ghcr.io/livebook-dev/livebook:latest
+    network_mode: host
+    environment:
+      - LIVEBOOK_TOKEN_ENABLED=false
+      - LIVEBOOK_HOME=/home/ex_tcp/livebook
+      - LIVEBOOK_PORT=8080
+    volumes:
+      - ./ex_tcp:/home/ex_tcp
+    # user: "${host_uid:-1000}:${host_gid:-1000}"
+    working_dir: /home/ex_tcp/livebook
+    restart: unless-stopped
+
+    depends_on:
+          - fw

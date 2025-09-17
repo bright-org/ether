@@ -1,0 +1,11 @@
+
+ip = {127, 0, 0, 1}
+
+{:ok, listen} = :gen_tcp.listen(40001, [:binary, {:ip, ip}, {:reuseaddr, true}, {:active, false}])
+IO.puts("[srv] listening on #{:inet.ntoa(ip)}:40001")
+{:ok, sock} = :gen_tcp.accept(listen)
+IO.puts("[srv] accepted!")
+{:ok, data} = :gen_tcp.recv(sock, 0, 3000)
+IO.puts("[srv] recv: #{inspect(data)}")
+:gen_tcp.send(sock, "pong")
+:gen_tcp.close(sock)
